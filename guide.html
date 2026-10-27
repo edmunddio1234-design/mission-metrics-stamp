@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>How to Use MM Stamp</title>
+<meta name="description" content="Simple steps: take a photo, stamp the Mission Metrics logo, save it to Photos.">
+<link rel="icon" href="assets/logo-badge.png">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
+<meta name="theme-color" content="#24406a">
+<style>
+:root{
+  --navy:#24406a; --navy-2:#1a3053; --blue:#4f9cc6; --lime:#bcd96a; --lime-2:#e6f0c4;
+  --ink:#14243a; --muted:#56687e; --line:#d5dee8; --bg:#ffffff; --card:#f3f7fb;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{padding-bottom:env(safe-area-inset-bottom)}
+.top{background:var(--navy);color:#fff;padding:calc(18px + env(safe-area-inset-top)) 16px 22px;border-bottom:6px solid var(--lime)}
+.top .in{max-width:720px;margin:0 auto;display:flex;gap:14px;align-items:center}
+.top img{width:60px;height:60px;border-radius:50%;background:#fff;flex:0 0 auto}
+.top h1{margin:0;font-size:24px;line-height:1.2}
+.top p{margin:4px 0 0;color:#cfe0ef;font-size:15px}
+main{max-width:720px;margin:0 auto;padding:18px 16px 40px}
+.back{display:inline-flex;align-items:center;gap:6px;min-height:44px;color:var(--navy);font-weight:600;text-decoration:none;font-size:16px}
+.open{display:flex;align-items:center;justify-content:center;min-height:54px;border-radius:12px;background:var(--navy);color:#fff;text-decoration:none;font-weight:700;font-size:17px;margin:6px 0 4px}
+.url{text-align:center;color:var(--muted);font-size:14px;margin:0 0 18px;word-break:break-all}
+h2{font-size:14px;letter-spacing:.07em;text-transform:uppercase;color:var(--blue);margin:26px 0 10px}
+ol{list-style:none;margin:0;padding:0;display:grid;gap:12px;counter-reset:s}
+li{counter-increment:s;display:grid;grid-template-columns:44px 1fr;gap:12px;background:var(--card);border:1px solid var(--line);border-left:5px solid var(--lime);border-radius:12px;padding:14px}
+li::before{content:counter(s);width:44px;height:44px;border-radius:10px;background:var(--navy);color:#fff;font-weight:800;font-size:20px;display:flex;align-items:center;justify-content:center}
+li b.t{display:block;font-size:17px;margin:2px 0 4px}
+li p{margin:0;font-size:16px;line-height:1.5;color:var(--ink)}
+.btnname{display:inline-block;background:#fff;border:1px solid var(--line);border-radius:6px;padding:0 6px;font-weight:700;color:var(--navy);white-space:nowrap}
+.tip{background:var(--lime-2);border:1px solid #cfe09a;border-radius:12px;padding:14px;font-size:15px;line-height:1.5;margin-top:12px}
+.tip b{color:var(--navy-2)}
+footer{color:var(--muted);font-size:13px;text-align:center;margin-top:30px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="in">
+    <img src="assets/logo-badge.png" alt="Mission Metrics logo">
+    <div>
+      <h1>How to stamp a photo</h1>
+      <p>Take a picture → logo goes on → save it. About 20 seconds.</p>
+    </div>
+  </div>
+</header>
+<main>
+  <a class="back" href="./" id="backLink">← Back to the app</a>
+  <a class="open" href="./">Open MM Stamp</a>
+  <p class="url" id="url"></p>
+
+  <h2>One time only: put it on your home screen</h2>
+  <ol>
+    <li><div><b class="t">Open the link in Safari</b><p>On your iPhone, open the link above in <b>Safari</b> (the compass icon).</p></div></li>
+    <li><div><b class="t">Tap the Share button</b><p>At the bottom of Safari, tap the <span class="btnname">Share</span> button (a square with an arrow pointing up).</p></div></li>
+    <li><div><b class="t">Add to Home Screen</b><p>Scroll down and tap <span class="btnname">Add to Home Screen</span>, then tap <span class="btnname">Add</span> in the top right. You now have an <b>MM Stamp</b> icon like a regular app.</p></div></li>
+  </ol>
+
+  <h2>Every time: stamp a photo</h2>
+  <ol style="counter-reset:s">
+    <li><div><b class="t">Open MM Stamp</b><p>Tap the <b>MM Stamp</b> icon on your home screen.</p></div></li>
+    <li><div><b class="t">Take the picture</b><p>Tap <span class="btnname">Take photo</span>. Snap the picture, then tap <span class="btnname">Use Photo</span>.<br>Already have the picture? Tap <span class="btnname">Choose from photos</span> instead.</p></div></li>
+    <li><div><b class="t">Check the logo</b><p>The Mission Metrics logo is now on the bottom-right corner. Want it somewhere else? Drag it with your finger.</p></div></li>
+    <li><div><b class="t">Save it</b><p>Tap <span class="btnname">Save photo</span>, then tap <span class="btnname">Save Image</span>. The stamped photo is now in your <b>Photos</b> app, ready to post or send.</p></div></li>
+    <li><div><b class="t">Next photo</b><p>Tap <span class="btnname">New photo</span> and repeat.</p></div></li>
+  </ol>
+
+  <h2>Optional: change the look</h2>
+  <div class="tip">
+    Scroll down under the photo:<br>
+    <b>Logo style</b> — <span class="btnname">Badge</span> (round logo), <span class="btnname">Color</span> (no white circle), <span class="btnname">White</span> (best on dark photos).<br>
+    <b>See-through</b> — slide to make the logo stronger or lighter.<br>
+    <b>Size</b> — slide to make it bigger or smaller.<br>
+    <b>Placement</b> — tap a square to move it to a corner or the middle.<br>
+    The app remembers your choices for next time.
+  </div>
+
+  <div class="tip">
+    <b>Android phone?</b> Open the link in Chrome, tap the <span class="btnname">⋮</span> menu at the top right, then <span class="btnname">Add to Home screen</span>. Everything else is the same. If you don't see <span class="btnname">Save Image</span>, tap <span class="btnname">Download this photo</span> — it goes to your Downloads / Gallery.
+  </div>
+
+  <footer>Your photos stay on your phone. Nothing is uploaded. · Mission Metrics</footer>
+</main>
+<script>
+  document.getElementById('url').textContent = location.origin + '/';
+  try { if (document.referrer && new URL(document.referrer).origin === location.origin) document.getElementById('backLink').addEventListener('click', e => { e.preventDefault(); history.back(); }); } catch (e) {}
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+  if (window.gsap && !matchMedia('(prefers-reduced-motion: reduce)').matches) gsap.from('li, .tip', { y: 12, opacity: 0, duration: .45, stagger: .05, ease: 'power2.out' });
+</script>
+</body>
+</html>

@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mission Metrics Stamp</title>
+<meta name="description" content="Add the Mission Metrics logo to any photo as a see-through stamp. Photos never leave your device.">
+<link rel="icon" href="assets/logo-badge.png">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#24406a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="MM Stamp">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<style>
+:root{
+  --bg:#0f1824; --panel:#162232; --panel-2:#1c2b3e; --line:#2a3c54;
+  --text:#eef3f8; --muted:#9db0c6; --navy:#24406a; --blue:#4f9cc6; --lime:#bcd96a;
+  --accent:#bcd96a; --accent-ink:#13202f; --danger:#ff8a80;
+  --radius:12px; --focus:0 0 0 3px rgba(188,217,106,.55);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#eef2f6; --panel:#ffffff; --panel-2:#f4f7fa; --line:#d5dee8;
+    --text:#14243a; --muted:#56687e; --accent:#24406a; --accent-ink:#ffffff;
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text)}
+body{min-height:100vh;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:none;box-shadow:var(--focus)}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 40px}
+header{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+header img{width:48px;height:48px}
+.howto{margin-left:auto;align-self:center;min-height:44px;display:inline-flex;align-items:center;padding:0 14px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--text);font-weight:600;font-size:15px;text-decoration:none;white-space:nowrap}
+header h1{font-size:22px;line-height:1.2;margin:0;font-weight:700;letter-spacing:-.01em}
+header p{margin:2px 0 0;color:var(--muted);font-size:14px}
+.layout{display:grid;grid-template-columns:1fr 330px;gap:18px;align-items:start}
+@media (max-width:860px){.layout{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius)}
+
+/* drop zone */
+.drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+  min-height:360px;padding:28px 16px;text-align:center;border:2px dashed var(--line);border-radius:var(--radius);
+  background:var(--panel);transition:border-color .2s,background .2s}
+.drop.over{border-color:var(--lime);background:var(--panel-2)}
+.drop svg{width:52px;height:52px;color:var(--blue)}
+.drop h2{margin:0;font-size:19px}
+.drop p{margin:0;color:var(--muted);font-size:15px}
+.dropbtns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+.dropbtns .btn{min-width:170px;min-height:50px;font-size:16px}
+.drop .desk{font-size:13px}
+@media (pointer:coarse){.drop .desk{display:none}}
+.btn{min-height:44px;padding:0 18px;border-radius:10px;border:1px solid var(--line);background:var(--panel-2);font-weight:600;font-size:15px;display:inline-flex;align-items:center;gap:8px;justify-content:center}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* preview */
+.stage{position:relative;display:none;padding:12px}
+.stage.on{display:block}
+.canvas-box{position:relative;display:flex;justify-content:center;align-items:center;background:
+  repeating-conic-gradient(var(--panel-2) 0 25%, var(--panel) 0 50%) 0 0/22px 22px;border-radius:8px;overflow:hidden;min-height:260px}
+#preview{max-width:100%;max-height:68vh;display:block;touch-action:none}
+.hint{font-size:13px;color:var(--muted);margin:8px 2px 0}
+.thumbs{display:flex;gap:8px;overflow-x:auto;padding:10px 2px 2px}
+.thumb{position:relative;flex:0 0 auto;width:72px;height:72px;border-radius:8px;border:2px solid transparent;padding:0;background:var(--panel-2);overflow:hidden}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb.on{border-color:var(--lime)}
+.thumb .x{position:absolute;top:2px;right:2px;width:22px;height:22px;border-radius:6px;border:0;background:rgba(0,0,0,.65);color:#fff;font-size:14px;line-height:22px;padding:0}
+.thumb.add{display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--muted);border:2px dashed var(--line)}
+
+/* controls */
+.controls{padding:6px 16px 16px}
+.group{padding:14px 0;border-bottom:1px solid var(--line)}
+.group:last-child{border-bottom:0}
+.glabel{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:10px}
+.help{width:28px;height:28px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--muted);font-weight:700;font-size:14px;padding:0}
+.helptext{display:none;font-size:14px;line-height:1.45;color:var(--text);background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:-2px 0 10px}
+.helptext.on{display:block}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.seg button{min-height:64px;border-radius:10px;border:1px solid var(--line);background:var(--panel-2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:12px;font-weight:600;padding:6px}
+.seg button img{height:30px;width:auto}
+.seg button[aria-pressed="true"]{border-color:var(--lime);box-shadow:inset 0 0 0 1px var(--lime)}
+.swatch-dark{background:#3a2a22 !important;color:#fff !important}
+.row{display:flex;align-items:center;justify-content:space-between;font-size:15px;margin:4px 0}
+.row output{font-variant-numeric:tabular-nums;color:var(--muted)}
+input[type=range]{width:100%;height:44px;accent-color:var(--lime);margin:0}
+.grid9{display:grid;grid-template-columns:repeat(3,44px);gap:6px}
+.grid9 button{width:44px;height:44px;border-radius:8px;border:1px solid var(--line);background:var(--panel-2);padding:0;position:relative}
+.grid9 button::after{content:"";position:absolute;width:10px;height:10px;border-radius:3px;background:var(--muted);left:50%;top:50%;transform:translate(-50%,-50%)}
+.grid9 button[aria-pressed="true"]{border-color:var(--lime)}
+.grid9 button[aria-pressed="true"]::after{background:var(--lime)}
+.posrow{display:flex;gap:14px;align-items:flex-start}
+.posside{display:flex;flex-direction:column;gap:6px;flex:1}
+.toggle{min-height:44px;border-radius:10px;border:1px solid var(--line);background:var(--panel-2);font-size:14px;font-weight:600}
+.toggle[aria-pressed="true"]{border-color:var(--lime);box-shadow:inset 0 0 0 1px var(--lime)}
+select{min-height:44px;width:100%;border-radius:10px;border:1px solid var(--line);background:var(--panel-2);padding:0 10px}
+.actions{display:grid;gap:8px}
+.note{font-size:13px;color:var(--muted);margin-top:10px;line-height:1.4}
+.quick{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.quick .btn{min-height:50px;font-size:16px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:12px 18px;border-radius:10px;font-size:15px;font-weight:600;opacity:0;pointer-events:none}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header id="hdr">
+    <img src="assets/logo-badge.png" alt="Mission Metrics logo">
+    <div>
+      <h1>Mission Metrics Stamp</h1>
+      <p>Take or pick a photo. The logo goes on. Save it.</p>
+    </div>
+    <a class="howto" href="guide.html">How to use</a>
+  </header>
+
+  <div class="layout">
+    <main>
+      <div id="drop" class="drop">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8a2 2 0 0 1 2-2h2.5l1.5-2h6l1.5 2H19a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <h2>Add a photo</h2>
+        <p>Take a picture or pick one. The logo goes on right away.</p>
+        <div class="dropbtns">
+          <label class="btn primary" for="cam">Take photo</label>
+          <label class="btn" for="file">Choose from photos</label>
+        </div>
+        <p class="desk">On a computer you can also drag photos here or paste them.</p>
+      </div>
+      <input id="cam" class="sr" type="file" accept="image/*" capture="environment">
+      <input id="file" class="sr" type="file" accept="image/*" multiple>
+
+      <section id="stage" class="stage card" aria-label="Preview">
+        <div class="canvas-box"><canvas id="preview" aria-label="Photo with logo"></canvas></div>
+        <p class="hint">Tip: drag the logo on the photo to put it exactly where you want.</p>
+        <div id="thumbs" class="thumbs" role="list"></div>
+        <div class="quick">
+          <button class="btn primary" id="qSave">Save photo</button>
+          <label class="btn" for="cam">New photo</label>
+        </div>
+      </section>
+    </main>
+
+    <aside class="card controls" aria-label="Stamp settings">
+      <div class="group">
+        <div class="glabel">Logo style <button class="help" data-help="h-style" aria-label="Help: logo style">?</button></div>
+        <div id="h-style" class="helptext">Pick how the logo looks. <b>Badge</b> is the full round logo. <b>Color</b> is the logo without the white circle. <b>White</b> is an all-white logo that shows up best on dark photos.</div>
+        <div class="seg" id="styleSeg">
+          <button data-style="badge" aria-pressed="true"><img src="assets/logo-badge.png" alt="">Badge</button>
+          <button data-style="clean" aria-pressed="false"><img src="assets/logo-clean.png" alt="">Color</button>
+          <button data-style="white" aria-pressed="false" class="swatch-dark"><img src="assets/logo-white.png" alt="">White</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="glabel">See-through <button class="help" data-help="h-op" aria-label="Help: see-through">?</button></div>
+        <div id="h-op" class="helptext">How see-through the logo is. Lower number = more faded into the photo. Around 60% keeps the Mission Metrics colors clear; 30% is a light watermark.</div>
+        <div class="row"><label for="opacity">Strength</label><output id="opacityOut">60%</output></div>
+        <input id="opacity" type="range" min="5" max="100" value="60">
+      </div>
+
+      <div class="group">
+        <div class="glabel">Size <button class="help" data-help="h-size" aria-label="Help: size">?</button></div>
+        <div id="h-size" class="helptext">How big the logo is, compared to the photo's shorter side. The logo keeps the same size on every photo, big or small.</div>
+        <div class="row"><label for="size">Logo size</label><output id="sizeOut">20%</output></div>
+        <input id="size" type="range" min="5" max="80" value="20">
+      </div>
+
+      <div class="group">
+        <div class="glabel">Placement <button class="help" data-help="h-pos" aria-label="Help: placement">?</button></div>
+        <div id="h-pos" class="helptext">Tap a square to put the logo in that spot. <b>Repeat</b> fills the whole photo with a pattern of logos, which is harder to crop out. You can also drag the logo on the preview.</div>
+        <div class="posrow">
+          <div class="grid9" id="grid9" role="group" aria-label="Logo position"></div>
+          <div class="posside">
+            <button class="toggle" id="tileBtn" aria-pressed="false">Repeat across photo</button>
+            <div class="row"><label for="margin">Edge space</label><output id="marginOut">4%</output></div>
+            <input id="margin" type="range" min="0" max="15" value="4">
+          </div>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="glabel">Save <button class="help" data-help="h-save" aria-label="Help: save">?</button></div>
+        <div id="h-save" class="helptext">Saves at the photo's full original size. <b>Apply to all</b> uses these same settings on every photo you added. JPG makes smaller files; PNG keeps the most detail.</div>
+        <div class="row" style="margin-bottom:8px"><label for="fmt">File type</label></div>
+        <select id="fmt" aria-label="File type">
+          <option value="auto">Same as original</option>
+          <option value="image/jpeg">JPG</option>
+          <option value="image/png">PNG</option>
+        </select>
+        <div class="actions" style="margin-top:12px">
+          <button class="btn primary" id="shareOne" hidden>Save to Photos / Share</button>
+          <button class="btn primary" id="dlOne" disabled>Download this photo</button>
+          <button class="btn" id="dlAll" disabled>Download all (.zip)</button>
+          <button class="btn" id="clearAll" disabled>Start over</button>
+        </div>
+        <p class="note">Everything happens in your browser. Nothing is uploaded.</p>
+      </div>
+    </aside>
+  </div>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+(() => {
+  const $ = s => document.querySelector(s);
+  const hasGsap = () => typeof window.gsap !== 'undefined';
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---------- state ----------
+  const S = { style:'badge', opacity:0.6, size:0.20, margin:0.04, pos:'br', tile:false, fmt:'auto', custom:null };
+  const photos = []; // {name,type,img,url,custom}
+  let current = -1;
+  const logos = {};
+  ['badge','clean','white'].forEach(k => { const i = new Image(); i.src = `assets/logo-${k}.png`; i.onload = draw; logos[k] = i; });
+
+  // remember settings on this device
+  try { Object.assign(S, JSON.parse(localStorage.getItem('mmstamp') || '{}'), {custom:null}); } catch(e) {}
+  const save = () => { try { const {custom, ...rest} = S; localStorage.setItem('mmstamp', JSON.stringify(rest)); } catch(e) {} };
+
+  // ---------- core stamping (shared by preview + export) ----------
+  function stamp(ctx, W, H, custom) {
+    const logo = logos[S.style];
+    if (!logo || !logo.complete || !logo.naturalWidth) return null;
+    const short = Math.min(W, H);
+    const lw = short * S.size, lh = lw * logo.naturalHeight / logo.naturalWidth;
+    const m = short * S.margin;
+    ctx.save();
+    ctx.globalAlpha = S.opacity;
+    if (S.tile) {
+      const gx = lw * 1.9, gy = lh * 1.9;
+      ctx.translate(W/2, H/2); ctx.rotate(-Math.PI/9); ctx.translate(-W/2, -H/2);
+      const span = Math.hypot(W, H);
+      for (let y = H/2 - span, r = 0; y < H/2 + span; y += gy, r++)
+        for (let x = W/2 - span + (r % 2 ? gx/2 : 0); x < W/2 + span; x += gx)
+          ctx.drawImage(logo, x, y, lw, lh);
+      ctx.restore();
+      return null;
+    }
+    let x, y;
+    if (custom) { x = custom.x * W - lw/2; y = custom.y * H - lh/2; }
+    else {
+      const c = S.pos[1], r = S.pos[0];
+      x = c === 'l' ? m : c === 'c' ? (W - lw)/2 : W - lw - m;
+      y = r === 't' ? m : r === 'm' ? (H - lh)/2 : H - lh - m;
+    }
+    ctx.drawImage(logo, x, y, lw, lh);
+    ctx.restore();
+    return { x, y, w: lw, h: lh };
+  }
+
+  // ---------- preview ----------
+  const cv = $('#preview'), cx = cv.getContext('2d');
+  let box = null;
+  function draw() {
+    const p = photos[current];
+    if (!p) return;
+    const img = p.img, maxSide = 1600;
+    const k = Math.min(1, maxSide / Math.max(img.naturalWidth, img.naturalHeight));
+    cv.width = Math.round(img.naturalWidth * k); cv.height = Math.round(img.naturalHeight * k);
+    cx.drawImage(img, 0, 0, cv.width, cv.height);
+    box = stamp(cx, cv.width, cv.height, p.custom);
+  }
+
+  // drag the logo on the preview
+  let dragging = false;
+  const pt = e => { const r = cv.getBoundingClientRect(); return { x:(e.clientX - r.left) / r.width, y:(e.clientY - r.top) / r.height }; };
+  cv.addEventListener('pointerdown', e => {
+    if (S.tile || !box || current < 0) return;
+    const q = pt(e), px = q.x * cv.width, py = q.y * cv.height;
+    if (px >= box.x && px <= box.x + box.w && py >= box.y && py <= box.y + box.h) { dragging = true; cv.setPointerCapture(e.pointerId); }
+  });
+  cv.addEventListener('pointermove', e => {
+    if (!dragging) { if (box && !S.tile) { const q = pt(e), px=q.x*cv.width, py=q.y*cv.height; cv.style.cursor = (px>=box.x&&px<=box.x+box.w&&py>=box.y&&py<=box.y+box.h)?'grab':'default'; } return; }
+    const q = pt(e); photos[current].custom = { x: Math.min(1, Math.max(0, q.x)), y: Math.min(1, Math.max(0, q.y)) };
+    cv.style.cursor = 'grabbing'; markGrid(); draw();
+  });
+  const endDrag = () => { dragging = false; };
+  cv.addEventListener('pointerup', endDrag); cv.addEventListener('pointercancel', endDrag);
+
+  // ---------- files ----------
+  function addFiles(list) {
+    const files = [...list].filter(f => f.type.startsWith('image/'));
+    if (!files.length) return toast('That isn’t a photo file');
+    let left = files.length;
+    const start = photos.length, slots = new Array(files.length).fill(null);
+    const done = () => {
+      if (--left) return;
+      const ok = slots.filter(Boolean);
+      photos.push(...ok);
+      if (photos.length) show(ok.length ? start : current);
+    };
+    files.forEach((f, i) => {
+      const url = URL.createObjectURL(f), img = new Image();
+      img.onload = () => { slots[i] = { name: f.name || 'photo.png', type: f.type, img, url, custom: null }; done(); };
+      img.onerror = () => { URL.revokeObjectURL(url); toast(`Couldn’t open ${f.name}`); done(); };
+      img.src = url;
+    });
+  }
+  function show(i) {
+    current = Math.max(0, Math.min(i, photos.length - 1));
+    const first = !$('#stage').classList.contains('on');
+    $('#drop').style.display = photos.length ? 'none' : '';
+    $('#stage').classList.toggle('on', photos.length > 0);
+    ['#dlOne','#shareOne','#dlAll','#clearAll'].forEach(s => $(s).disabled = !photos.length);
+    $('#dlAll').disabled = photos.length < 2;
+    renderThumbs(); markGrid(); draw();
+    if (first && photos.length && hasGsap() && !reduce) gsap.from('#stage', { y: 16, opacity: 0, duration: .45, ease: 'power2.out' });
+  }
+  function renderThumbs() {
+    const t = $('#thumbs'); t.innerHTML = '';
+    photos.forEach((p, i) => {
+      const b = document.createElement('div'); b.className = 'thumb' + (i === current ? ' on' : ''); b.setAttribute('role','listitem');
+      b.innerHTML = `<button style="all:unset;display:block;width:100%;height:100%;cursor:pointer" aria-label="Show ${p.name.replace(/"/g,'')}"><img src="${p.url}" alt=""></button><button class="x" aria-label="Remove photo">×</button>`;
+      b.firstChild.onclick = () => show(i);
+      b.querySelector('.x').onclick = e => { e.stopPropagation(); URL.revokeObjectURL(p.url); photos.splice(i, 1); if (!photos.length) return reset(); show(i >= photos.length ? photos.length - 1 : i); };
+      t.appendChild(b);
+    });
+    const add = document.createElement('button'); add.className = 'thumb add'; add.textContent = '+'; add.setAttribute('aria-label','Add more photos');
+    add.onclick = () => $('#file').click(); t.appendChild(add);
+  }
+  function reset() {
+    photos.forEach(p => URL.revokeObjectURL(p.url)); photos.length = 0; current = -1;
+    $('#stage').classList.remove('on'); $('#drop').style.display = '';
+    ['#dlOne','#shareOne','#dlAll','#clearAll'].forEach(s => $(s).disabled = true);
+  }
+
+  ['#file','#cam'].forEach(s => $(s).addEventListener('change', e => { addFiles(e.target.files); e.target.value = ''; }));
+  const drop = $('#drop');
+  ['dragenter','dragover'].forEach(ev => document.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+  ['dragleave','drop'].forEach(ev => document.addEventListener(ev, e => { e.preventDefault(); if (ev === 'drop' || e.target === drop) drop.classList.remove('over'); }));
+  document.addEventListener('drop', e => { if (e.dataTransfer && e.dataTransfer.files.length) addFiles(e.dataTransfer.files); });
+  document.addEventListener('paste', e => { const f = [...(e.clipboardData?.files || [])]; if (f.length) addFiles(f); });
+
+  // ---------- controls ----------
+  const seg = $('#styleSeg');
+  seg.querySelectorAll('button').forEach(b => b.onclick = () => { S.style = b.dataset.style; syncUI(); save(); draw(); });
+  const bindRange = (id, key, out, scale) => {
+    const el = $('#'+id); el.value = Math.round(S[key] * scale);
+    el.oninput = () => { S[key] = el.value / scale; $('#'+out).textContent = el.value + '%'; save(); draw(); };
+    $('#'+out).textContent = el.value + '%';
+  };
+  bindRange('opacity','opacity','opacityOut',100);
+  bindRange('size','size','sizeOut',100);
+  bindRange('margin','margin','marginOut',100);
+  const g = $('#grid9');
+  [['tl','Top left'],['tc','Top center'],['tr','Top right'],['ml','Middle left'],['mc','Center'],['mr','Middle right'],['bl','Bottom left'],['bc','Bottom center'],['br','Bottom right']].forEach(([k,label]) => {
+    const b = document.createElement('button'); b.dataset.pos = k; b.setAttribute('aria-label', label);
+    b.onclick = () => { S.pos = k; S.tile = false; photos.forEach(p => p.custom = null); syncUI(); save(); draw(); };
+    g.appendChild(b);
+  });
+  $('#tileBtn').onclick = () => { S.tile = !S.tile; syncUI(); save(); draw(); };
+  const fmt = $('#fmt'); fmt.value = S.fmt; fmt.onchange = () => { S.fmt = fmt.value; save(); };
+  function markGrid() {
+    const custom = photos[current] && photos[current].custom;
+    g.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(!S.tile && !custom && b.dataset.pos === S.pos)));
+  }
+  function syncUI() {
+    seg.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.style === S.style)));
+    $('#tileBtn').setAttribute('aria-pressed', String(S.tile));
+    markGrid();
+  }
+  syncUI();
+
+  document.querySelectorAll('.help').forEach(b => b.onclick = () => {
+    const t = document.getElementById(b.dataset.help); const on = !t.classList.contains('on');
+    t.classList.toggle('on', on); b.setAttribute('aria-expanded', String(on));
+    if (on && hasGsap() && !reduce) gsap.from(t, { opacity: 0, y: -6, duration: .25 });
+  });
+
+  // ---------- export ----------
+  function outType(p) {
+    if (S.fmt !== 'auto') return S.fmt;
+    return /png|webp/.test(p.type) ? 'image/png' : 'image/jpeg';
+  }
+  function render(p) {
+    return new Promise((res, rej) => {
+      const c = document.createElement('canvas');
+      c.width = p.img.naturalWidth; c.height = p.img.naturalHeight;
+      const x = c.getContext('2d');
+      const type = outType(p);
+      if (type === 'image/jpeg') { x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); }
+      x.drawImage(p.img, 0, 0);
+      stamp(x, c.width, c.height, p.custom);
+      c.toBlob(b => b ? res({ blob: b, name: outName(p.name, type) }) : rej(new Error('export failed')), type, 0.92);
+    });
+  }
+  function outName(n, type) {
+    const base = n.replace(/\.[^.]+$/, '') || 'photo';
+    return `${base}-mission-metrics.${type === 'image/png' ? 'png' : 'jpg'}`;
+  }
+  function saveBlob(blob, name) {
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  }
+  $('#dlOne').onclick = async () => {
+    try { const r = await render(photos[current]); saveBlob(r.blob, r.name); toast('Saved ' + r.name); } catch (e) { toast('Sorry — that photo could not be saved'); }
+  };
+  $('#dlAll').onclick = async () => {
+    const btn = $('#dlAll'); btn.disabled = true; const label = btn.textContent;
+    try {
+      if (typeof JSZip === 'undefined') { for (const p of photos) { const r = await render(p); saveBlob(r.blob, r.name); } toast('Saved ' + photos.length + ' photos'); return; }
+      const zip = new JSZip(), used = {};
+      for (let i = 0; i < photos.length; i++) {
+        btn.textContent = `Working… ${i + 1} of ${photos.length}`;
+        const r = await render(photos[i]);
+        let n = r.name; if (used[n]) n = n.replace(/(\.\w+)$/, `-${++used[r.name]}$1`); else used[n] = 1;
+        zip.file(n, r.blob);
+      }
+      const z = await zip.generateAsync({ type: 'blob' });
+      saveBlob(z, 'mission-metrics-photos.zip'); toast('Saved ' + photos.length + ' photos');
+    } catch (e) { toast('Sorry — something went wrong saving'); }
+    finally { btn.textContent = label; btn.disabled = photos.length < 2; }
+  };
+  $('#clearAll').onclick = reset;
+  $('#qSave').onclick = () => (!$('#shareOne').hidden ? $('#shareOne') : $('#dlOne')).click();
+
+  // phone: share sheet → "Save Image" puts it in Photos
+  const canShareFiles = (() => {
+    try { return !!(navigator.canShare && navigator.canShare({ files: [new File([new Blob(['x'], {type:'image/png'})], 'x.png', { type: 'image/png' })] })); } catch (e) { return false; }
+  })();
+  if (canShareFiles) {
+    $('#shareOne').hidden = false;
+    $('#dlOne').classList.remove('primary');
+    $('#shareOne').onclick = async () => {
+      try {
+        const r = await render(photos[current]);
+        const file = new File([r.blob], r.name, { type: r.blob.type });
+        await navigator.share({ files: [file], title: 'Mission Metrics photo' });
+      } catch (e) { if (e && e.name !== 'AbortError') toast('Sharing didn’t work — use Download instead'); }
+    };
+  }
+
+  let tt;
+  function toast(m) {
+    const t = $('#toast'); t.textContent = m; clearTimeout(tt);
+    if (hasGsap()) { gsap.killTweensOf(t); gsap.fromTo(t, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: .25 }); }
+    else t.style.opacity = 1;
+    tt = setTimeout(() => hasGsap() ? gsap.to(t, { opacity: 0, duration: .3 }) : (t.style.opacity = 0), 2400);
+  }
+
+  // entrance
+  if (hasGsap() && !reduce) {
+    gsap.from('#hdr', { y: -10, opacity: 0, duration: .5, ease: 'power2.out' });
+    gsap.from('.drop, aside .group', { y: 14, opacity: 0, duration: .5, stagger: .06, ease: 'power2.out', delay: .1 });
+  }
+  window.__mmstamp = { photos, S, render }; // for testing
+})();
+</script>
+</body>
+</html>
