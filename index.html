@@ -103,6 +103,8 @@ select{min-height:44px;width:100%;border-radius:10px;border:1px solid var(--line
 .note{font-size:13px;color:var(--muted);margin-top:10px;line-height:1.4}
 .quick{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 .quick .btn{min-height:50px;font-size:16px}
+.quick .wide{grid-column:1/-1}
+.applyall{margin-top:8px;width:100%}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:12px 18px;border-radius:10px;font-size:15px;font-weight:600;opacity:0;pointer-events:none}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 </style>
@@ -135,11 +137,12 @@ select{min-height:44px;width:100%;border-radius:10px;border:1px solid var(--line
 
       <section id="stage" class="stage card" aria-label="Preview">
         <div class="canvas-box"><canvas id="preview" aria-label="Photo with logo"></canvas></div>
-        <p class="hint">Tip: drag the logo on the photo to put it exactly where you want.</p>
+        <p class="hint" id="hint">Tip: drag the logo on the photo to put it exactly where you want.</p>
         <div id="thumbs" class="thumbs" role="list"></div>
         <div class="quick">
-          <button class="btn primary" id="qSave">Save photo</button>
+          <button class="btn primary" id="qSave">Save this photo</button>
           <label class="btn" for="cam">New photo</label>
+          <button class="btn primary wide" id="qAll" hidden>Save all photos</button>
         </div>
       </section>
     </main>
@@ -171,7 +174,7 @@ select{min-height:44px;width:100%;border-radius:10px;border:1px solid var(--line
 
       <div class="group">
         <div class="glabel">Placement <button class="help" data-help="h-pos" aria-label="Help: placement">?</button></div>
-        <div id="h-pos" class="helptext">Tap a square to put the logo in that spot. <b>Repeat</b> fills the whole photo with a pattern of logos, which is harder to crop out. You can also drag the logo on the preview.</div>
+        <div id="h-pos" class="helptext">Tap a square to put the logo in that spot on <b>the photo you are looking at</b>. Each photo keeps its own spot, so you can tap the small pictures one by one and choose. <b>Use this spot on all photos</b> copies it to every photo. <b>Repeat</b> fills the whole photo with a pattern of logos, which is harder to crop out. You can also drag the logo on the preview.</div>
         <div class="posrow">
           <div class="grid9" id="grid9" role="group" aria-label="Logo position"></div>
           <div class="posside">
@@ -180,11 +183,12 @@ select{min-height:44px;width:100%;border-radius:10px;border:1px solid var(--line
             <input id="margin" type="range" min="0" max="15" value="4">
           </div>
         </div>
+        <button class="btn applyall" id="applyAll" hidden>Use this spot on all photos</button>
       </div>
 
       <div class="group">
         <div class="glabel">Save <button class="help" data-help="h-save" aria-label="Help: save">?</button></div>
-        <div id="h-save" class="helptext">Saves at the photo's full original size. <b>Apply to all</b> uses these same settings on every photo you added. JPG makes smaller files; PNG keeps the most detail.</div>
+        <div id="h-save" class="helptext">Saves at the photo's full original size, as normal picture files (no zip). <b>Save all photos</b> saves every photo, each with the logo where you put it. On a phone, tap <b>Save Images</b> to put them all in Photos. JPG makes smaller files; PNG keeps the most detail.</div>
         <div class="row" style="margin-bottom:8px"><label for="fmt">File type</label></div>
         <select id="fmt" aria-label="File type">
           <option value="auto">Same as original</option>
@@ -194,7 +198,7 @@ select{min-height:44px;width:100%;border-radius:10px;border:1px solid var(--line
         <div class="actions" style="margin-top:12px">
           <button class="btn primary" id="shareOne" hidden>Save to Photos / Share</button>
           <button class="btn primary" id="dlOne" disabled>Download this photo</button>
-          <button class="btn" id="dlAll" disabled>Download all (.zip)</button>
+          <button class="btn" id="dlAll" disabled>Save all photos</button>
           <button class="btn" id="clearAll" disabled>Start over</button>
         </div>
         <p class="note">Everything happens in your browser. Nothing is uploaded.</p>
@@ -205,7 +209,6 @@ select{min-height:44px;width:100%;border-radius:10px;border:1px solid var(--line
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
 (() => {
   const $ = s => document.querySelector(s);
@@ -224,7 +227,8 @@ select{min-height:44px;width:100%;border-radius:10px;border:1px solid var(--line
   const save = () => { try { const {custom, ...rest} = S; localStorage.setItem('mmstamp', JSON.stringify(rest)); } catch(e) {} };
 
   // ---------- core stamping (shared by preview + export) ----------
-  function stamp(ctx, W, H, custom) {
+  function stamp(ctx, W, H, p) {
+    const custom = p && p.custom, pos = (p && p.pos) || S.pos;
     const logo = logos[S.style];
     if (!logo || !logo.complete || !logo.naturalWidth) return null;
     const short = Math.min(W, H);
@@ -245,7 +249,7 @@ select{min-height:44px;width:100%;border-radius:10px;border:1px solid var(--line
     let x, y;
     if (custom) { x = custom.x * W - lw/2; y = custom.y * H - lh/2; }
     else {
-      const c = S.pos[1], r = S.pos[0];
+      const c = pos[1], r = pos[0];
       x = c === 'l' ? m : c === 'c' ? (W - lw)/2 : W - lw - m;
       y = r === 't' ? m : r === 'm' ? (H - lh)/2 : H - lh - m;
     }
@@ -264,7 +268,7 @@ select{min-height:44px;width:100%;border-radius:10px;border:1px solid var(--line
     const k = Math.min(1, maxSide / Math.max(img.naturalWidth, img.naturalHeight));
     cv.width = Math.round(img.naturalWidth * k); cv.height = Math.round(img.naturalHeight * k);
     cx.drawImage(img, 0, 0, cv.width, cv.height);
-    box = stamp(cx, cv.width, cv.height, p.custom);
+    box = stamp(cx, cv.width, cv.height, p);
   }
 
   // drag the logo on the preview
@@ -297,7 +301,7 @@ select{min-height:44px;width:100%;border-radius:10px;border:1px solid var(--line
     };
     files.forEach((f, i) => {
       const url = URL.createObjectURL(f), img = new Image();
-      img.onload = () => { slots[i] = { name: f.name || 'photo.png', type: f.type, img, url, custom: null }; done(); };
+      img.onload = () => { slots[i] = { name: f.name || 'photo.png', type: f.type, img, url, custom: null, pos: S.pos }; done(); };
       img.onerror = () => { URL.revokeObjectURL(url); toast(`Couldn’t open ${f.name}`); done(); };
       img.src = url;
     });
@@ -309,6 +313,10 @@ select{min-height:44px;width:100%;border-radius:10px;border:1px solid var(--line
     $('#stage').classList.toggle('on', photos.length > 0);
     ['#dlOne','#shareOne','#dlAll','#clearAll'].forEach(s => $(s).disabled = !photos.length);
     $('#dlAll').disabled = photos.length < 2;
+    const many = photos.length > 1;
+    $('#qAll').hidden = !many; $('#applyAll').hidden = !many;
+    $('#qAll').textContent = `Save all ${photos.length} photos`;
+    $('#hint').textContent = many ? 'Tip: tap a small picture below to choose where the logo goes on that photo. Drag the logo to move it.' : 'Tip: drag the logo on the photo to put it exactly where you want.';
     renderThumbs(); markGrid(); draw();
     if (first && photos.length && hasGsap() && !reduce) gsap.from('#stage', { y: 16, opacity: 0, duration: .45, ease: 'power2.out' });
   }
@@ -328,6 +336,7 @@ select{min-height:44px;width:100%;border-radius:10px;border:1px solid var(--line
     photos.forEach(p => URL.revokeObjectURL(p.url)); photos.length = 0; current = -1;
     $('#stage').classList.remove('on'); $('#drop').style.display = '';
     ['#dlOne','#shareOne','#dlAll','#clearAll'].forEach(s => $(s).disabled = true);
+    $('#qAll').hidden = true; $('#applyAll').hidden = true;
   }
 
   ['#file','#cam'].forEach(s => $(s).addEventListener('change', e => { addFiles(e.target.files); e.target.value = ''; }));
@@ -351,14 +360,14 @@ select{min-height:44px;width:100%;border-radius:10px;border:1px solid var(--line
   const g = $('#grid9');
   [['tl','Top left'],['tc','Top center'],['tr','Top right'],['ml','Middle left'],['mc','Center'],['mr','Middle right'],['bl','Bottom left'],['bc','Bottom center'],['br','Bottom right']].forEach(([k,label]) => {
     const b = document.createElement('button'); b.dataset.pos = k; b.setAttribute('aria-label', label);
-    b.onclick = () => { S.pos = k; S.tile = false; photos.forEach(p => p.custom = null); syncUI(); save(); draw(); };
+    b.onclick = () => { S.pos = k; S.tile = false; const p = photos[current]; if (p) { p.pos = k; p.custom = null; } syncUI(); save(); draw(); };
     g.appendChild(b);
   });
   $('#tileBtn').onclick = () => { S.tile = !S.tile; syncUI(); save(); draw(); };
   const fmt = $('#fmt'); fmt.value = S.fmt; fmt.onchange = () => { S.fmt = fmt.value; save(); };
   function markGrid() {
-    const custom = photos[current] && photos[current].custom;
-    g.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(!S.tile && !custom && b.dataset.pos === S.pos)));
+    const p = photos[current], custom = p && p.custom, pos = (p && p.pos) || S.pos;
+    g.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(!S.tile && !custom && b.dataset.pos === pos)));
   }
   function syncUI() {
     seg.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.style === S.style)));
@@ -386,8 +395,8 @@ select{min-height:44px;width:100%;border-radius:10px;border:1px solid var(--line
       const type = outType(p);
       if (type === 'image/jpeg') { x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); }
       x.drawImage(p.img, 0, 0);
-      stamp(x, c.width, c.height, p.custom);
-      c.toBlob(b => b ? res({ blob: b, name: outName(p.name, type) }) : rej(new Error('export failed')), type, 0.92);
+      stamp(x, c.width, c.height, p);
+      c.toBlob(b => b ? res({ blob: b, name: outName(p.name, type) }) : rej(new Error('export failed')), type, 0.95);
     });
   }
   function outName(n, type) {
@@ -401,22 +410,37 @@ select{min-height:44px;width:100%;border-radius:10px;border:1px solid var(--line
   $('#dlOne').onclick = async () => {
     try { const r = await render(photos[current]); saveBlob(r.blob, r.name); toast('Saved ' + r.name); } catch (e) { toast('Sorry — that photo could not be saved'); }
   };
-  $('#dlAll').onclick = async () => {
-    const btn = $('#dlAll'); btn.disabled = true; const label = btn.textContent;
+  $('#applyAll').onclick = () => {
+    const p = photos[current]; if (!p) return;
+    photos.forEach(q => { q.pos = p.pos; q.custom = p.custom ? { ...p.custom } : null; });
+    toast('Same spot on all ' + photos.length + ' photos');
+  };
+  // Save every photo as its own normal picture file (no zip)
+  async function saveAll() {
+    const btns = [$('#dlAll'), $('#qAll')]; const labels = btns.map(b => b.textContent);
+    btns.forEach(b => b.disabled = true);
     try {
-      if (typeof JSZip === 'undefined') { for (const p of photos) { const r = await render(p); saveBlob(r.blob, r.name); } toast('Saved ' + photos.length + ' photos'); return; }
-      const zip = new JSZip(), used = {};
+      const files = [], used = {};
       for (let i = 0; i < photos.length; i++) {
-        btn.textContent = `Working… ${i + 1} of ${photos.length}`;
+        btns.forEach(b => b.textContent = `Getting ready… ${i + 1} of ${photos.length}`);
         const r = await render(photos[i]);
         let n = r.name; if (used[n]) n = n.replace(/(\.\w+)$/, `-${++used[r.name]}$1`); else used[n] = 1;
-        zip.file(n, r.blob);
+        files.push(new File([r.blob], n, { type: r.blob.type }));
       }
-      const z = await zip.generateAsync({ type: 'blob' });
-      saveBlob(z, 'mission-metrics-photos.zip'); toast('Saved ' + photos.length + ' photos');
+      let shared = false;
+      if (navigator.canShare && navigator.share) {
+        try { if (navigator.canShare({ files })) { await navigator.share({ files, title: 'Mission Metrics photos' }); shared = true; } }
+        catch (e) { if (e && e.name === 'AbortError') return; }
+      }
+      if (!shared) {
+        for (const f of files) { saveBlob(f, f.name); await new Promise(r => setTimeout(r, 400)); }
+        toast('Saved ' + files.length + ' photos');
+      }
     } catch (e) { toast('Sorry — something went wrong saving'); }
-    finally { btn.textContent = label; btn.disabled = photos.length < 2; }
-  };
+    finally { btns.forEach((b, k) => { b.textContent = labels[k]; b.disabled = false; }); $('#dlAll').disabled = photos.length < 2; }
+  }
+  $('#dlAll').onclick = saveAll;
+  $('#qAll').onclick = saveAll;
   $('#clearAll').onclick = reset;
   $('#qSave').onclick = () => (!$('#shareOne').hidden ? $('#shareOne') : $('#dlOne')).click();
 
